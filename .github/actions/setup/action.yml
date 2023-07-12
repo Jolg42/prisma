@@ -22,11 +22,13 @@ runs:
           registry-url: 'https://registry.npmjs.org'
 
       - run: pnpm install
+        shell: bash
         env:
           SKIP_GIT: true
           GITHUB_CONTEXT: ${{ toJson(github) }}
       
       - run: pnpm run setup
+        shell: bash
         env:
           SKIP_GIT: true
           GITHUB_CONTEXT: ${{ toJson(github) }}
