@@ -17,18 +17,13 @@ runs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ inputs.node-version }}
+          cache: 'pnpm'
           # This makes it possible to publish to npm later
           # The NPM_TOKEN secret needs to be defined in the job
           registry-url: 'https://registry.npmjs.org'
 
       - run: pnpm install
         shell: bash
-        env:
-          SKIP_GIT: true
-          GITHUB_CONTEXT: ${{ toJson(github) }}
       
       - run: pnpm run setup
         shell: bash
-        env:
-          SKIP_GIT: true
-          GITHUB_CONTEXT: ${{ toJson(github) }}

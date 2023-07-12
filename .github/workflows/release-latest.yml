@@ -49,6 +49,7 @@ jobs:
           BUILDKITE_BRANCH: ${{ github.ref_name }}
           ONLY_PACKAGES: ${{ github.event.inputs.onlyPackages }}
           SKIP_PACKAGES: ${{ github.event.inputs.skipPackages }}
+          GITHUB_CONTEXT: ${{ toJson(github) }}
 
   failure:
     needs:
