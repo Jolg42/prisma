@@ -23,7 +23,7 @@ on:
 jobs:
   release:
     timeout-minutes: 60
-    environment: "latest"
+    environment: "npm-ci"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -39,6 +39,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           BUILDKITE: true
           BUILDKITE_BRANCH: ${{ github.ref_name }}
+          GITHUB_CONTEXT: ${{ toJson(github) }}
 
   failure:
     needs:

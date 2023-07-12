@@ -1,5 +1,5 @@
 name: npm - release to latest
-run-name: npm - release ${{ github.event.inputs.promotedDevVersion }} as ${{ github.event.inputs.targetVersion }} on latest
+run-name: npm - release ${{ github.event.inputs.targetVersion }} from ${{ github.ref_name }} on latest tag
 
 on:
   workflow_dispatch:
@@ -8,10 +8,6 @@ on:
         description: 'Version to publish on latest tag (e.g. 5.0.0)'
         type: string
         required: true
-      # promotedDevVersion:
-      #   description: 'Dev version to promote to latest tag (e.g. 5.1.0-dev.22'
-      #   type: string
-      #   required: true
       skipEcosystemTestsChecks:
         description: 'Skip ecosystem tests checks? (e.g. true)'
         type: boolean
@@ -27,7 +23,7 @@ on:
 jobs:
   release:
     timeout-minutes: 60
-    environment: "latest"
+    environment: "npm-latest"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
