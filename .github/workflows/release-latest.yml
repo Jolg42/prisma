@@ -36,7 +36,7 @@ jobs:
         with:
           node-version: 16
 
-      - name: Publish all packages to latest
+      - name: Publish all packages to npm
         run: |
           echo "BUILDKITE_TAG $BUILDKITE_TAG"
           echo "SKIP_ECOSYSTEMTESTS_CHECK $SKIP_ECOSYSTEMTESTS_CHECK"

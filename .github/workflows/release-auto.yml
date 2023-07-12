@@ -32,7 +32,7 @@ jobs:
         with:
           node-version: 16
 
-      - name: Publish all packages to latest
+      - name: Publish all packages to npm
         run: pnpm run publish-all
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
