@@ -52,6 +52,7 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
           # Note: must use personal access token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
 
 # Cuurently done in `sendSlackMessage()` in publish.ts, we should move it here later
 # success:
