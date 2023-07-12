@@ -1,0 +1,58 @@
+name: npm - release to dev/integration
+run-name: npm - release ${{ github.event.inputs.promotedDevVersion }} as ${{ github.event.inputs.targetVersion }} on latest
+
+on:
+  push:
+    branches:
+      - main
+      - 'integration/*'
+      - '*.*.x'
+    paths-ignore:
+      - '*.md'
+      - '.devcontainer/**'
+      - '.vscode/**'
+      - '.github/ISSUE_TEMPLATE/**'
+      - 'LICENSE'
+      - '.github/CODEOWNERS'
+      - '.buildkite/**'
+      - '.dockerignore'
+      - '*.bench.ts'
+      - 'graphs/**'
+  workflow_dispatch:
+
+jobs:
+  release:
+    timeout-minutes: 60
+    environment: "latest"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/setup
+        with:
+          node-version: 16
+
+      - name: Publish all packages to latest
+        run: pnpm run publish-all
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          BUILDKITE: true
+          BUILDKITE_BRANCH: ${{ github.ref_name }}
+
+  failure:
+    needs:
+      - release
+    if: ${{ failure() }}
+    name: Communicate failure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set current job url in SLACK_FOOTER env var
+        run: echo "SLACK_FOOTER=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|Click here to go to the job logs>" >> $GITHUB_ENV
+
+      - name: Slack Notification on Failure
+        uses: rtCamp/action-slack-notify@v2.2.0
+        env:
+          SLACK_TITLE: 'prisma/prisma Release failed :x:'
+          SLACK_COLOR: '#FF0000'
+          # SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          # SLACK_CHANNEL: feed-prisma-daily-build-failures TODO

@@ -510,11 +510,6 @@ async function publish() {
     '--test': Boolean,
   })
 
-  // TODO: can we remove this? probably
-  if (process.env.BUILDKITE && process.env.PUBLISH_BUILD && !process.env.GITHUB_TOKEN) {
-    throw new Error(`Missing env var GITHUB_TOKEN`)
-  }
-
   if (!process.env.BUILDKITE_BRANCH) {
     throw new Error(`Missing env var BUILDKITE_BRANCH`)
   }
