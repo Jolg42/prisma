@@ -1,0 +1,80 @@
+name: npm - release to latest
+run-name: npm - release ${{ github.event.inputs.promotedDevVersion }} as ${{ github.event.inputs.targetVersion }} on latest
+
+on:
+  workflow_dispatch:
+    inputs:
+      targetVersion:
+        description: 'Version to publish on latest tag (e.g. 5.0.0)'
+        required: true
+      promotedDevVersion:
+        description: 'Dev version to promote to latest tag (e.g. 5.1.0-dev.22'
+        required: true
+      skipEcosystemTestsChecks:
+        description: 'Skip ecosystem tests checks? (e.g. true)'
+        type: boolean
+
+jobs:
+  release:
+    timeout-minutes: 60
+    # environment: "production"
+    # uses: ./.github/workflows/test-template.yml
+    # with:
+    #   reason: daily-test
+    #   jobTimeout: 70
+    #   ubuntuRunner: ubuntu-latest
+    # secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 7
+
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm i
+        env:
+          CI: true
+          SKIP_GIT: true
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+      
+      - run: pnpm run setup
+        env:
+          CI: true
+          SKIP_GIT: true
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+
+      - run: |
+          echo "BUILDKITE_TAG $BUILDKITE_TAG"
+          echo "RELEASE_PROMOTE_DEV $RELEASE_PROMOTE_DEV"
+          echo "SKIP_ECOSYSTEMTESTS_CHECK $SKIP_ECOSYSTEMTESTS_CHECK"
+          pnpm run publish-all
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          BUILDKITE_TAG: ${{ github.event.inputs.targetVersion }}
+          RELEASE_PROMOTE_DEV: ${{ github.event.inputs.promotedDevVersion }}
+          SKIP_ECOSYSTEMTESTS_CHECK: ${{ github.event.inputs.skipEcosystemTestsChecks }}
+
+  failure:
+    needs:
+      - release
+    if: ${{ failure() }}
+    name: Communicate failure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set current job url in SLACK_FOOTER env var
+        run: echo "SLACK_FOOTER=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|Click here to go to the job logs>" >> $GITHUB_ENV
+
+      - name: Slack Notification on Failure
+        uses: rtCamp/action-slack-notify@v2.2.0
+        env:
+          SLACK_TITLE: 'prisma/prisma Release failed :x:'
+          SLACK_COLOR: '#FF0000'
+          # SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          # SLACK_CHANNEL: feed-prisma-daily-build-failures TODO
