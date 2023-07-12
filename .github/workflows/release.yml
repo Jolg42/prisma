@@ -47,8 +47,8 @@ jobs:
           BUILDKITE_TAG: ${{ github.event.inputs.targetVersion }}
           RELEASE_PROMOTE_DEV: ${{ github.event.inputs.promotedDevVersion }}
           SKIP_ECOSYSTEMTESTS_CHECK: ${{ github.event.inputs.skipEcosystemTestsChecks }}
-          # TODO BUILDKITE_BRANCH
-          BUILDKITE_BRANCH: "main"
+          BUILDKITE: true
+          BUILDKITE_BRANCH: ${{ github.ref_name }}
           ONLY_PACKAGES: ${{ github.event.inputs.onlyPackages }}
           SKIP_PACKAGES: ${{ github.event.inputs.skipPackages }}
 
