@@ -17,7 +17,7 @@ on:
 jobs:
   release:
     timeout-minutes: 60
-    # environment: "production"
+    environment: "latest"
     # uses: ./.github/workflows/test-template.yml
     # with:
     #   reason: daily-test
@@ -60,6 +60,8 @@ jobs:
           BUILDKITE_TAG: ${{ github.event.inputs.targetVersion }}
           RELEASE_PROMOTE_DEV: ${{ github.event.inputs.promotedDevVersion }}
           SKIP_ECOSYSTEMTESTS_CHECK: ${{ github.event.inputs.skipEcosystemTestsChecks }}
+          # TODO
+          BUILDKITE_BRANCH: "main"
 
   failure:
     needs:
