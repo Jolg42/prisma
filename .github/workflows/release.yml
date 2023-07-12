@@ -8,10 +8,10 @@ on:
         description: 'Version to publish on latest tag (e.g. 5.0.0)'
         type: string
         required: true
-      promotedDevVersion:
-        description: 'Dev version to promote to latest tag (e.g. 5.1.0-dev.22'
-        type: string
-        required: true
+      # promotedDevVersion:
+      #   description: 'Dev version to promote to latest tag (e.g. 5.1.0-dev.22'
+      #   type: string
+      #   required: true
       skipEcosystemTestsChecks:
         description: 'Skip ecosystem tests checks? (e.g. true)'
         type: boolean
@@ -39,13 +39,11 @@ jobs:
       - name: Publish all packages to latest
         run: |
           echo "BUILDKITE_TAG $BUILDKITE_TAG"
-          echo "RELEASE_PROMOTE_DEV $RELEASE_PROMOTE_DEV"
           echo "SKIP_ECOSYSTEMTESTS_CHECK $SKIP_ECOSYSTEMTESTS_CHECK"
           pnpm run publish-all
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           BUILDKITE_TAG: ${{ github.event.inputs.targetVersion }}
-          RELEASE_PROMOTE_DEV: ${{ github.event.inputs.promotedDevVersion }}
           SKIP_ECOSYSTEMTESTS_CHECK: ${{ github.event.inputs.skipEcosystemTestsChecks }}
           BUILDKITE: true
           BUILDKITE_BRANCH: ${{ github.ref_name }}

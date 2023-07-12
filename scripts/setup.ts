@@ -7,35 +7,8 @@ async function main() {
   // this is for when you want to use it locally
   const buildOnly = process.argv[2] === '--build' // can we remove this?
 
-  if (process.env.BUILDKITE_TAG && !process.env.RELEASE_PROMOTE_DEV) {
-    throw new Error(`When providing BUILDKITE_TAG, you also need to provide the env var RELEASE_PROMOTE_DEV, which
-has to point to the dev version you want to promote, for example 2.1.0-dev.123`)
-  }
-
-  if (process.env.RELEASE_PROMOTE_DEV && !process.env.BUILDKITE_TAG) {
-    throw new Error(`You provided RELEASE_PROMOTE_DEV without BUILDKITE_TAG, which doesn't make sense.`)
-  }
-
-  // only change git config on CI
-  if (process.env.CI && !process.env.SKIP_GIT) {
-    await run('.', `git config --global user.email "prismabots@gmail.com"`)
-    await run('.', `git config --global user.name "prisma-bot"`)
-  }
-
-  if (process.env.RELEASE_PROMOTE_DEV) {
-    // this is a way to get the commit hash of that specific version
-    const versions = await getPrismaCommitFromPackageJsonViaNpmRegistry(process.env.RELEASE_PROMOTE_DEV)
-
-    await run(`.`, `git stash`) // TODO: can we remove this?
-    await run(`.`, `git checkout ${versions.prisma}`, true) // TODO: disable the dry run here
-    // TODO: maybe worth doing a test to see if this ever worked?
-  } else if (process.env.PATCH_BRANCH) {
-    // TODO: can we remove this? probably
-    await checkoutPatchBranches(process.env.PATCH_BRANCH)
-    console.log(`Commit we're on:`)
-    await execa.command('git rev-parse HEAD', {
-      stdio: 'inherit',
-    })
+  if (!process.env.BUILDKITE_TAG) {
+    throw new Error(`BUILDKITE_TAG must be defined.`)
   }
 
   // TODO: separate into utils shared between publish & setup
@@ -120,12 +93,6 @@ async function checkoutPatchBranches(patchBranch: string) {
   }
 }
 
-// Unused
-// function getTagFromPatchBranch(patchBranch: string): string {
-//   const [major, minor, patch] = patchBranch.split('.')
-//   return `${major}.${minor}.0`
-// }
-
 async function branchExists(dir: string, branch: string): Promise<boolean> {
   const output = await runResult(dir, `git branch --list ${branch}`)
   const exists = output.trim().length > 0
@@ -133,16 +100,4 @@ async function branchExists(dir: string, branch: string): Promise<boolean> {
     console.log(`Branch exists: ${exists}`)
   }
   return exists
-}
-
-function getPrismaCommitFromPackageJsonViaNpmRegistry(npmVersion: string): Promise<{ prisma: string }> {
-  return fetch(`https://registry.npmjs.org/prisma/${npmVersion}`, {
-    headers: {
-      accept: 'application/json',
-    },
-  })
-    .then((res) => res.json())
-    .then((pkg) => {
-      return pkg.prisma.prismaCommit
-    })
 }

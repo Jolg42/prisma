@@ -34,6 +34,7 @@ async function getLatestCommit(dir: string): Promise<Commit> {
     const context = JSON.parse(process.env.GITHUB_CONTEXT)
     return context.sha
   }
+  
   const result = await runResult(dir, 'git log --pretty=format:"%ad %H %P" --date=iso-strict -n 1')
   const [date, commit, ...parents] = result.split(' ')
 
@@ -537,10 +538,6 @@ async function publish() {
     // and then replace the args['--release'] with it
   }
 
-  if (process.env.BUILDKITE_TAG && !process.env.RELEASE_PROMOTE_DEV) {
-    throw new Error(`When BUILDKITE_TAG is provided, RELEASE_PROMOTE_DEV also needs to be provided`)
-  }
-
   if (!args['--test'] && !args['--publish'] && !dryRun) {
     throw new Error('Please either provide --test or --publish or --dry-run')
   }
@@ -674,7 +671,7 @@ Check them out at https://github.com/prisma/ecosystem-tests/actions?query=workfl
         console.error(e)
       }
 
-      if (!process.env.PATCH_BRANCH && !args['--dry-run']) {
+      if (!args['--dry-run']) {
         try {
           await tagEnginesRepo(prismaVersion, enginesCommit, patchBranch, dryRun)
         } catch (e) {
@@ -977,50 +974,6 @@ async function publishPackages(
       }
     }
   }
-
-  if (process.env.PATCH_BRANCH) {
-    if (process.env.CI) {
-      await run('.', `git config --global user.email "prismabots@gmail.com"`)
-      await run('.', `git config --global user.name "prisma-bot"`)
-    }
-    await run(
-      '.',
-      `git remote set-url origin https://${process.env.GITHUB_TOKEN}@github.com/prisma/prisma.git`,
-      dryRun,
-      true,
-    )
-  }
-
-  // TODO: remove?
-  if (!process.env.BUILDKITE || process.env.PATCH_BRANCH) {
-    const repo = path.join(__dirname, '../../../')
-    // commit and push it :)
-    // we try catch this, as this is not necessary for CI to succeed
-    await run(repo, `git status`, dryRun)
-    await pull(repo, dryRun).catch((e) => {
-      if (process.env.PATCH_BRANCH) {
-        console.error(e)
-      } else {
-        throw e
-      }
-    })
-
-    try {
-      const unsavedChanges = await getUnsavedChanges(repo)
-      if (!unsavedChanges) {
-        console.log(`\n${bold('Skipping')} committing changes, as they're already committed`)
-      } else {
-        console.log(`\nCommitting changes`)
-        const message = 'Bump versions'
-        await commitChanges(repo, `${message} [skip ci]`, dryRun)
-      }
-      const branch = process.env.PATCH_BRANCH
-      await push(repo, dryRun, branch).catch(console.error)
-    } catch (e) {
-      console.error(e)
-      console.error(`Ignoring this error, continuing`)
-    }
-  }
 }
 
 function isSkipped(pkgName) {
@@ -1119,11 +1072,6 @@ async function areEcosystemTestsPassing(tag: string): Promise<boolean> {
 }
 
 function getPatchBranch() {
-  // TODO: this can probably be removed
-  if (process.env.PATCH_BRANCH) {
-    return process.env.PATCH_BRANCH
-  }
-
   if (process.env.BUILDKITE_BRANCH) {
     const versions = getSemverFromPatchBranch(process.env.BUILDKITE_BRANCH)
     console.debug('versions from patch branch:', versions)
