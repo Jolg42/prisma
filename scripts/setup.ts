@@ -7,10 +7,6 @@ async function main() {
   // this is for when you want to use it locally
   const buildOnly = process.argv[2] === '--build' // can we remove this?
 
-  if (!process.env.RELEASE_TO_LATEST && !process.env.BUILDKITE_TAG) {
-    throw new Error(`RELEASE_TO_LATEST & BUILDKITE_TAG must be defined to release to latest.`)
-  }
-
   // TODO: separate into utils shared between publish & setup
   if (buildOnly === false) {
     console.debug(`Installing dependencies`)
