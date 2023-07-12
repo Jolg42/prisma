@@ -45,6 +45,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           BUILDKITE_TAG: ${{ github.event.inputs.targetVersion }}
           SKIP_ECOSYSTEMTESTS_CHECK: ${{ github.event.inputs.skipEcosystemTestsChecks }}
+          RELEASE_TO_LATEST: true
           BUILDKITE: true
           BUILDKITE_BRANCH: ${{ github.ref_name }}
           ONLY_PACKAGES: ${{ github.event.inputs.onlyPackages }}

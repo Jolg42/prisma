@@ -1,5 +1,5 @@
 name: npm - release to dev/integration
-run-name: npm - release ${{ github.event.inputs.promotedDevVersion }} as ${{ github.event.inputs.targetVersion }} on latest
+run-name: npm - release from ${{ github.ref_name }} to dev/integration 
 
 on:
   push:
