@@ -1,0 +1,34 @@
+name: Setup
+description: Boilerplate steps needed by most jobs.
+
+inputs:
+  node-version:
+    description: Version of Node.js to use.
+    required: true
+
+runs:
+  using: composite
+  steps:
+      - uses: actions/checkout@v3
+
+      - uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 7
+
+      - name: Use Node.js ${{ inputs.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.node-version }}
+          # This makes it possible to publish to npm later
+          # The NPM_TOKEN secret needs to be defined in the job
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install
+        env:
+          SKIP_GIT: true
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+      
+      - run: pnpm run setup
+        env:
+          SKIP_GIT: true
+          GITHUB_CONTEXT: ${{ toJson(github) }}

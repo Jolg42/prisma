@@ -6,51 +6,38 @@ on:
     inputs:
       targetVersion:
         description: 'Version to publish on latest tag (e.g. 5.0.0)'
+        type: string
         required: true
       promotedDevVersion:
         description: 'Dev version to promote to latest tag (e.g. 5.1.0-dev.22'
+        type: string
         required: true
       skipEcosystemTestsChecks:
         description: 'Skip ecosystem tests checks? (e.g. true)'
         type: boolean
+      skipPackages:
+        description: 'Skip some packages? (e.g. `@prisma/debug,@prisma/internals`)'
+        type: string
+        required: false
+      onlyPackages:
+        description: 'Only publish some packages? (e.g. `@prisma/debug,@prisma/internals`)'
+        type: string
+        required: false
 
 jobs:
   release:
     timeout-minutes: 60
     environment: "latest"
-    # uses: ./.github/workflows/test-template.yml
-    # with:
-    #   reason: daily-test
-    #   jobTimeout: 70
-    #   ubuntuRunner: ubuntu-latest
-    # secrets: inherit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - uses: pnpm/action-setup@v2.2.4
+      - uses: ./.github/actions/setup
         with:
-          version: 7
+          node-version: 16
 
-      # Setup .npmrc file to publish to npm
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-          registry-url: 'https://registry.npmjs.org'
-
-      - run: pnpm i
-        env:
-          CI: true
-          SKIP_GIT: true
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-      
-      - run: pnpm run setup
-        env:
-          CI: true
-          SKIP_GIT: true
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-
-      - run: |
+      - name: Publish all packages to latest
+        run: |
           echo "BUILDKITE_TAG $BUILDKITE_TAG"
           echo "RELEASE_PROMOTE_DEV $RELEASE_PROMOTE_DEV"
           echo "SKIP_ECOSYSTEMTESTS_CHECK $SKIP_ECOSYSTEMTESTS_CHECK"
@@ -60,8 +47,10 @@ jobs:
           BUILDKITE_TAG: ${{ github.event.inputs.targetVersion }}
           RELEASE_PROMOTE_DEV: ${{ github.event.inputs.promotedDevVersion }}
           SKIP_ECOSYSTEMTESTS_CHECK: ${{ github.event.inputs.skipEcosystemTestsChecks }}
-          # TODO
+          # TODO BUILDKITE_BRANCH
           BUILDKITE_BRANCH: "main"
+          ONLY_PACKAGES: ${{ github.event.inputs.onlyPackages }}
+          SKIP_PACKAGES: ${{ github.event.inputs.skipPackages }}
 
   failure:
     needs:
