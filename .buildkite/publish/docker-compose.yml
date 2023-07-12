@@ -46,7 +46,6 @@ services:
       - TEST_FUNCTIONAL_MONGO_URI=mongodb://root:prisma@mongo:27018/PRISMA_DB_NAME?authSource=admin
       - TEST_FUNCTIONAL_COCKROACH_URI=postgresql://prisma@cockroachdb:26257/PRISMA_DB_NAME
       # Other vars !\ If not defined, they cannot be accessed
-      # TODO: do an env var cleanup?
       - NPM_TOKEN
       # Used to create a tag the prisma-engines repository
       # After packages are published on npm
@@ -56,8 +55,6 @@ services:
       - BUILDKITE_BRANCH
       - ONLY_PACKAGES
       - REDIS_URL
-      - MIGRATE_COMMIT
-      - PRISMA_CLIENT_JS_COMMIT
       - DRY_RUN
       - CI
       - PRISMA_TELEMETRY_INFORMATION="buildkite prisma publish"
