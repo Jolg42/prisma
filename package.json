@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "dev-env",
+  "name": "dev-env-patch",
   "triggerEmptyDevReleaseByIncrementingThisNumber": 0,
   "license": "Apache-2.0",
   "engines": {
