@@ -96,7 +96,7 @@ jobs:
       matrix:
         shard: ['1/5', '2/5', '3/5', '4/5', '5/5']
         queryEngine: ${{ fromJson(inputs.queryEngine) }}
-        node: [18, 20]
+        node: [16, 18, 20]
 
     env:
       TEST_POSTGRES_URI: postgres://prisma:prisma@localhost:5432/tests
@@ -592,7 +592,7 @@ jobs:
       matrix:
         queryEngine: ${{ fromJson(inputs.queryEngine) }}
         os: [ubuntu-latest]
-        node: [16, 18]
+        node: [16, 18, 20]
 
     steps:
       - uses: actions/checkout@v3
@@ -650,7 +650,7 @@ jobs:
       matrix:
         queryEngine: ${{ fromJson(inputs.queryEngine) }}
         os: [ubuntu-latest]
-        node: [16, 18]
+        node: [16, 18, 20]
 
     steps:
       - uses: actions/checkout@v3
